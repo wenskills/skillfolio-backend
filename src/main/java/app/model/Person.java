@@ -1,5 +1,6 @@
 package app.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -14,6 +15,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Setter
+@Getter
 public class Person {
 
     @Id
@@ -40,6 +43,7 @@ public class Person {
     private String password;
 
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Activity> cv = new ArrayList<>();
 
 

@@ -40,9 +40,9 @@ class PersonRepositoryTest {
     @Test
     void testUpdatePerson() {
         Person person = new Person();
-        person.setFirstName("Alice");
+        person.setFirstName("Alicile");
         person.setLastName("Smith");
-        person.setEmail("alice@example.com");
+        person.setEmail("alicile@example.com");
         person.setPassword("password123");
         personRepository.save(person);
 
@@ -58,7 +58,7 @@ class PersonRepositoryTest {
         Person person = new Person();
         person.setFirstName("Bob");
         person.setLastName("Marley");
-        person.setEmail("bob@example.com");
+        person.setEmail("bobb@example.com");
         person.setPassword("password123");
         personRepository.save(person);
 
