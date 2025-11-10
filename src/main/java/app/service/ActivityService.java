@@ -2,6 +2,7 @@ package app.service;
 
 import app.dao.ActivityRepository;
 import app.model.Activity;
+import app.model.Person;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -52,4 +53,6 @@ public class ActivityService {
     public List<Activity> searchByTitle(String title) {
         return activityRepository.searchByTitle(title);
     }
+
+
 }

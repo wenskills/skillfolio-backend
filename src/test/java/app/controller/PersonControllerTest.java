@@ -1,7 +1,10 @@
 package app.controller;
 
+import app.dao.ActivityRepository;
 import app.dao.PersonRepository;
 import app.dto.PersonDTO;
+import app.model.Activity;
+import app.model.ActivityNature;
 import app.model.Person;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.modelmapper.ModelMapper;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -27,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("open")
 class PersonControllerTest {
 
     @Autowired
@@ -34,6 +39,9 @@ class PersonControllerTest {
 
     @Autowired
     private PersonRepository personRepository;
+
+    @Autowired
+    private ActivityRepository activityRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -63,7 +71,6 @@ class PersonControllerTest {
         personRepository.save(person2);
     }
 
-    /** 🔹 Test GET /api/persons (findAll) */
     @Test
     void testGetAllPersons() throws Exception {
         mvc.perform(get("/api/persons")
@@ -74,7 +81,6 @@ class PersonControllerTest {
                 .andExpect(jsonPath("$[1].firstName").value("Bob"));
     }
 
-    /** 🔹 Test GET /api/persons/{id} (findById) */
     @Test
     void testGetPersonById() throws Exception {
         mvc.perform(get("/api/persons/" + person1.getId())
@@ -85,7 +91,6 @@ class PersonControllerTest {
                 .andExpect(jsonPath("$.firstName").value("Alice"));
     }
 
-    /** 🔹 Test GET /api/persons/{id} - not found */
     @Test
     void testGetPersonById_NotFound() throws Exception {
         mvc.perform(get("/api/persons/9999")
@@ -227,6 +232,27 @@ class PersonControllerTest {
                 .andExpect(status().isNoContent());
     }
 
+    @Test
+    void testGetActivitiesByPerson_Success() throws Exception {
+        Activity  activity1 = new Activity();
+        activity1.setYear(2025);
+        activity1.setNature(ActivityNature.PROJET);
+        activity1.setTitle("Archictecture des apps");
+        activity1.setDescription("Développement API CVs");
+        activity1.setPerson(person1);
+        activityRepository.save(activity1);
+        mvc.perform(get("/api/persons/" + person1.getId() + "/activities")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void testGetActivitiesByPerson_NotFound() throws Exception {
+        mvc.perform(get("/api/persons/9999/activities"))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
 
 
 }

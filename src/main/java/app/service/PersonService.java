@@ -53,4 +53,7 @@ public class PersonService {
         return personRepository.searchByKeyword(keyword);
     }
 
+    public Optional<Person> findByEmail(String email) {
+        return personRepository.findByEmailIgnoreCase(email);
+    }
 }

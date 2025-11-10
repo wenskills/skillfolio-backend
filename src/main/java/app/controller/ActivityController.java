@@ -10,6 +10,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -18,7 +20,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/activities")
-@CrossOrigin(origins = "*")
 public class ActivityController {
 
     @Autowired
@@ -46,9 +47,11 @@ public class ActivityController {
     @PostMapping
     public ResponseEntity<ActivityDTO> createActivity(@Valid @RequestBody ActivityDTO dto) {
 
-        Person person = personService.findById(dto.getPersonId())
-                .orElseThrow(() -> new IllegalArgumentException("Person not found with id " + dto.getPersonId()));
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
 
+        Person person = personService.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Authenticated person not found"));
 
         Activity activity = modelMapper.map(dto, Activity.class);
         activity.setPerson(person);
@@ -63,18 +66,20 @@ public class ActivityController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Activity> updateActivity(@PathVariable Long id, @Valid @RequestBody ActivityDTO dto) {
-        Person person = personService.findById(dto.getPersonId())
-                .orElseThrow(() -> new IllegalArgumentException("Person not found with id " + dto.getPersonId()));
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
 
-        Activity updatedData = modelMapper.map(dto, Activity.class);
-        updatedData.setPerson(person);
+        Activity existing = activityService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Activity not found"));
 
-        try {
-            Activity updated = activityService.update(id, updatedData);
-            return ResponseEntity.ok(updated);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        if (!existing.getPerson().getEmail().equals(email)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+
+        modelMapper.map(dto, existing);
+
+        Activity updated = activityService.update(id, existing);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")

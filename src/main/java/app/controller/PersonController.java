@@ -1,6 +1,7 @@
 package app.controller;
 
 import app.dto.PersonDTO;
+import app.model.Activity;
 import app.model.Person;
 import app.service.PersonService;
 import jakarta.validation.Valid;
@@ -23,10 +24,7 @@ public class PersonController {
     @GetMapping
     public ResponseEntity<List<Person>> getAllPersons(){
         List<Person> personList = personService.findAll();
-        if(personList.isEmpty()){
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.of(Optional.of(personList));
+        return ResponseEntity.ok(personList);
     }
 
     @GetMapping("/{id}")
@@ -81,5 +79,23 @@ public class PersonController {
         }
         return ResponseEntity.ok(found);
     }
+
+    @GetMapping("/{id}/activities")
+    public ResponseEntity<List<Activity>> getActivitiesByPerson(@PathVariable Long id) {
+        Optional<Person> personOpt = personService.findById(id);
+        if (personOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        Person person = personOpt.get();
+        List<Activity> cv = person.getCv();
+
+        if (cv == null || cv.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(cv);
+    }
+
 
 }
