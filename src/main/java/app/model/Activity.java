@@ -7,6 +7,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
+@Table(
+        indexes = {
+                @Index(name = "idx_activity_title", columnList = "title"),
+                @Index(name = "idx_activity_nature", columnList = "nature")
+        }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,14 +24,14 @@ public class Activity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+    @NotNull(message = "L'année est obligatoire")
     private Integer year;
 
-    @NotNull
+    @NotNull(message = "Le type est obligatoire")
     @Enumerated(EnumType.STRING)
     private ActivityNature nature;
 
-    @NotBlank
+    @NotBlank(message = "Le titre est obligatoire")
     private String title;
 
     @Column(length = 2000)

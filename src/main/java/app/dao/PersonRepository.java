@@ -2,6 +2,8 @@ package app.dao;
 
 import app.model.Person;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,11 +17,20 @@ import java.util.Optional;
 @Transactional
 public interface PersonRepository extends JpaRepository<Person, Long> {
     @Query("""
-       SELECT p FROM Person p
-       WHERE LOWER(p.firstName) LIKE LOWER(CONCAT('%', :keyword, '%'))
-          OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :keyword, '%'))
-       """)
-    List<Person> searchByKeyword(@Param("keyword") String keyword);
+        SELECT p FROM Person p
+        WHERE LOWER(p.firstName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+           OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+    """)
+    Page<Person> searchByName(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("""
+        SELECT DISTINCT a.person FROM Activity a
+        WHERE LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+    """)
+    Page<Person> searchByActivity(@Param("keyword") String keyword, Pageable pageable);
+
     Optional<Person> findByEmailIgnoreCase(String email);
     boolean existsByEmailIgnoreCase(String email);
+    Page<Person> findAll(Pageable pageable);
+
 }

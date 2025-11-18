@@ -68,7 +68,7 @@ public class JwtWebSecurityConfig {
             config.requestMatchers(HttpMethod.GET, "/api/persons/**", "/api/activities/**").permitAll();
 
             config.requestMatchers(HttpMethod.POST, "/api/persons/**").authenticated();
-
+            config.requestMatchers(HttpMethod.PUT, "/api/persons/**").authenticated();
             config.requestMatchers(HttpMethod.POST, "/api/activities/**").authenticated();
             config.requestMatchers(HttpMethod.PUT, "/api/activities/**").authenticated();
             config.requestMatchers(HttpMethod.DELETE, "/api/activities/**").authenticated();
@@ -76,10 +76,9 @@ public class JwtWebSecurityConfig {
             config.anyRequest().denyAll();
         });
 
-        // Gestion d’accès refusé
-        http.exceptionHandling(config -> config.accessDeniedPage("/secu-users/login"));
 
-        // Filtre JWT avant l’authentification classique
+        http.exceptionHandling(config -> config.accessDeniedPage("/auth/login"));
+
         JwtFilter customFilter = new JwtFilter(jwtTokenProvider);
         http.addFilterBefore(customFilter, UsernamePasswordAuthenticationFilter.class);
 

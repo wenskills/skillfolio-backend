@@ -12,6 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(
+        indexes = {
+                @Index(name = "idx_person_firstname", columnList = "firstName"),
+                @Index(name = "idx_person_lastname", columnList = "lastName"),
+                @Index(name = "idx_person_email", columnList = "email")
+        }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,14 +30,14 @@ public class Person {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    @NotBlank(message = "Le nom est obligatoire")
     private String lastName;
 
-    @NotBlank
+    @NotBlank(message = "Le prénom est obligatoire")
     private String firstName;
 
-    @NotBlank
-    @Email
+    @NotBlank(message = "L'email est obligatoire")
+    @Email(message = "Format d'email invalide")
     @Column(unique = true, nullable = false)
     private String email;
 
@@ -39,7 +46,7 @@ public class Person {
     private LocalDate birthDate;
 
     @NotBlank
-    @Size(min = 8)
+    @Size(min = 8, message = "Le mot de passe doit faire au moins 8 caractères")
     private String password;
 
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)

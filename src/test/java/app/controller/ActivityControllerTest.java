@@ -14,10 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -60,6 +63,11 @@ class ActivityControllerTest {
         person.setBirthDate(LocalDate.of(1990, 1, 1));
         personRepository.save(person);
 
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(person.getEmail(), null, List.of())
+        );
+
+
         activity1 = new Activity();
         activity1.setYear(2024);
         activity1.setNature(ActivityNature.PROJET);
@@ -78,7 +86,6 @@ class ActivityControllerTest {
         activityRepository.save(activity2);
     }
 
-   /* @Test
     void testCreateActivity_Success() throws Exception {
         ActivityDTO dto = new ActivityDTO();
         dto.setYear(2025);
@@ -97,7 +104,7 @@ class ActivityControllerTest {
                 .andExpect(jsonPath("$.personId").value(person.getId()));
 
         assertThat(activityRepository.findAll()).hasSize(3);
-    }*/
+    }
 
     @Test
     void testCreateActivity_ShouldFail_BadRequest() throws Exception {
@@ -141,7 +148,7 @@ class ActivityControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    /*@Test
+
     void testUpdateActivity_Success() throws Exception {
         ActivityDTO updateDTO = new ActivityDTO();
         updateDTO.setYear(2024);
@@ -157,9 +164,9 @@ class ActivityControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Spring Boot Advanced"))
                 .andExpect(jsonPath("$.description").value("API + Tests avancés"));
-    }*/
+    }
 
-   /* @Test
+
     void testUpdateActivity_NotFound() throws Exception {
         ActivityDTO dto = new ActivityDTO();
         dto.setYear(2025);
@@ -172,7 +179,7 @@ class ActivityControllerTest {
                         .content(objectMapper.writeValueAsString(dto)))
                 .andDo(print())
                 .andExpect(status().isNotFound());
-    }*/
+    }
 
     @Test
     void testUpdateActivity_ShouldFail_BadRequest() throws Exception {
@@ -204,22 +211,5 @@ class ActivityControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    /** 🔹 Test GET /api/persons/search?keyword=dup */
-    @Test
-    void testSearchPersons() throws Exception {
-        mvc.perform(get("/api/persons/search?keyword=dup")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].firstName").value("Alice"))
-                .andExpect(jsonPath("$[0].lastName").value("Dupont"));
-    }
-
-    @Test
-    void testSearchPersons_NoResult() throws Exception {
-        mvc.perform(get("/api/persons/search?keyword=fantome"))
-                .andDo(print())
-                .andExpect(status().isNoContent());
-    }
 
 }

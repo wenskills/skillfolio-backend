@@ -16,13 +16,13 @@ public class ActivityDTO {
 
     private Long id;
 
-    @NotNull
+    @NotNull(message = "L'année est obligatoire")
     private Integer year;
 
-    @NotNull
+    @NotNull(message = "Le type est obligatoire")
     private ActivityNature nature;
 
-    @NotBlank
+    @NotBlank(message = "Le titre est obligatoire")
     private String title;
 
     private String description;

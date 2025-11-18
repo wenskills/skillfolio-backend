@@ -1,14 +1,21 @@
 package app.controller;
 
 import app.dto.PersonDTO;
+import app.dto.PersonFormDTO;
 import app.model.Activity;
 import app.model.Person;
 import app.service.PersonService;
 import jakarta.validation.Valid;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,11 +28,20 @@ public class PersonController {
     @Autowired
     private PersonService personService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    protected final Log logger = LogFactory.getLog(getClass());
+
     @GetMapping
-    public ResponseEntity<List<Person>> getAllPersons(){
-        List<Person> personList = personService.findAll();
-        return ResponseEntity.ok(personList);
+    public ResponseEntity<Page<Person>> getAllPersons(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
+        Page<Person> persons = personService.findAll(page, size);
+        return ResponseEntity.ok(persons);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Person> getPersonByid(@PathVariable Long id){
@@ -36,6 +52,8 @@ public class PersonController {
 
     @PostMapping
     public ResponseEntity<Person> createPerson(@Valid @RequestBody PersonDTO personDTO){
+
+        personDTO.setPassword(passwordEncoder.encode(personDTO.getPassword()));
         ModelMapper modelMapper = new ModelMapper();
         Person person = modelMapper.map(personDTO, Person.class);
 
@@ -44,17 +62,27 @@ public class PersonController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/me")
     public ResponseEntity<Person> updatePerson(
-            @PathVariable Long id,
-            @Valid @RequestBody PersonDTO personDTO) {
+            @Valid @RequestBody PersonFormDTO personDTO) {
 
-        ModelMapper modelMapper = new ModelMapper();
-        Person updatedData = modelMapper.map(personDTO,Person.class);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getName() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String email = auth.getName();
+
+        Person existing = personService.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        logger.info(personDTO);
+        ModelMapper mapper = new ModelMapper();
+        Person updatedData = mapper.map(personDTO, Person.class);
 
         try {
-            Person updated = personService.update(id, updatedData);
-            return ResponseEntity.ok(updated);
+            Person saved = personService.update(existing.getId(), updatedData);
+            return ResponseEntity.ok(saved);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -72,13 +100,15 @@ public class PersonController {
 
 
     @GetMapping("/search")
-    public ResponseEntity<List<Person>> searchPersons(@RequestParam String keyword){
-        List<Person> found = personService.search(keyword);
-        if(found.isEmpty()){
-            return ResponseEntity.noContent().build();
-        }
+    public ResponseEntity<Page<Person>> searchPersons(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
+        Page<Person> found = personService.search(keyword, page, size);
         return ResponseEntity.ok(found);
     }
+
 
     @GetMapping("/{id}/activities")
     public ResponseEntity<List<Activity>> getActivitiesByPerson(@PathVariable Long id) {

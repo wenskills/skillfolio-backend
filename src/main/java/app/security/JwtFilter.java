@@ -51,8 +51,6 @@ public class JwtFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
         } catch (JwtException ex) {
-            // Cette ligne est très importante pour garantir que
-            // le contexte de sécurité est bien supprimé.
             SecurityContextHolder.clearContext();
             httpServletResponse.sendError(ex.getStatusCode().value(), ex.getMessage());
             return;

@@ -1,6 +1,5 @@
 package app.dto;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -15,8 +14,7 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PersonDTO {
-
+public class PersonFormDTO {
     @NotBlank(message = "Le nom est obligatoire")
     String lastName;
 
@@ -30,8 +28,6 @@ public class PersonDTO {
     String website;
 
     LocalDate birthDate;
-
-    @NotBlank
     @Size(min = 8, message = "Le mot de passe doit faire au moins 8 caractères")
     String password;
 }

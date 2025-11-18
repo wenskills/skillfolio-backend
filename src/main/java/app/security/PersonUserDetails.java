@@ -22,7 +22,7 @@ public class PersonUserDetails implements UserDetailsService {
         Person p = personRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Person not found with email: " + email));
 
-        // Par défaut, toutes les Person ont le rôle USER
+        /* Par défaut, toutes les Person ont le rôle USER*/
         var authorities = List.of(new SimpleGrantedAuthority("USER"));
 
         return User
