@@ -36,8 +36,8 @@ public class DataInitializer {
     private final Faker faker = new Faker();
     private final Random random = new Random();
 
-    private static final int TOTAL = 100_000;
-    private static final int BATCH_SIZE = 500;
+    private static final int TOTAL = 10;
+    private static final int BATCH_SIZE = 5;
 
     @PostConstruct
     public void initData() {

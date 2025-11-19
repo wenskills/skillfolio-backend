@@ -1,7 +1,10 @@
 package app.service;
 
 import app.dao.PersonRepository;
+import app.dto.PersonCreateDTO;
+import app.dto.ResetPasswordDTO;
 import app.model.Person;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -11,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -22,6 +26,9 @@ public class PersonService {
 
     @Autowired
     private PasswordEncoder encoder;
+
+    @Autowired
+    private EmailService emailService;
 
     public PersonService(PersonRepository personRepository) {
         this.personRepository = personRepository;
@@ -87,5 +94,65 @@ public class PersonService {
 
     public Optional<Person> findByEmail(String email) {
         return personRepository.findByEmailIgnoreCase(email);
+    }
+
+    /**
+     * Création via cooptation : mot de passe + token envoyés par mail
+     */
+    public Person createViaCooptation(PersonCreateDTO dto) {
+
+        if (personRepository.existsByEmailIgnoreCase(dto.getEmail())) {
+            throw new IllegalArgumentException("Email déjà utilisé");
+        }
+
+        Person p = new Person();
+        p.setFirstName(dto.getFirstName());
+        p.setLastName(dto.getLastName());
+        p.setEmail(dto.getEmail());
+        p.setBirthDate(dto.getBirthDate());
+        p.setWebsite(dto.getWebsite());
+
+        // mot de passe temporaire
+        String tempPass = RandomStringUtils.randomAlphanumeric(10);
+        p.setPassword(encoder.encode(tempPass));
+
+        // token de reset
+        String token = UUID.randomUUID().toString();
+        p.setResetToken(token);
+        p.setResetTokenExpiration(LocalDateTime.now().plusHours(24));
+
+        Person saved = personRepository.save(p);
+
+        // email
+        emailService.sendWelcomeEmail(saved, tempPass, token);
+
+        return saved;
+    }
+
+    /**
+     * reset-password
+     */
+    public boolean resetPassword(ResetPasswordDTO dto) {
+
+        Optional<Person> opt = personRepository.findByResetToken(dto.getToken());
+        if (opt.isEmpty()) return false;
+
+        Person user = opt.get();
+
+        if (user.getResetTokenExpiration() == null ||
+                user.getResetTokenExpiration().isBefore(LocalDateTime.now())) {
+            return false;
+        }
+
+        if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+            throw new IllegalArgumentException("Les mots de passe ne correspondent pas.");
+        }
+
+        user.setPassword(encoder.encode(dto.getNewPassword()));
+        user.setResetToken(null);
+        user.setResetTokenExpiration(null);
+
+        personRepository.save(user);
+        return true;
     }
 }

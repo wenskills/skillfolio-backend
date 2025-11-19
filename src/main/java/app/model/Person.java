@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,5 +54,6 @@ public class Person {
     @JsonManagedReference
     private List<Activity> cv = new ArrayList<>();
 
-
+    private String resetToken;
+    private LocalDateTime resetTokenExpiration;
 }

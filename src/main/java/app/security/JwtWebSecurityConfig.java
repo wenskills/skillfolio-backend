@@ -64,7 +64,7 @@ public class JwtWebSecurityConfig {
 
 
             config.requestMatchers("/auth/**").permitAll();
-
+            config.requestMatchers("api/persons/reset-password").permitAll();
             config.requestMatchers(HttpMethod.GET, "/api/persons/**", "/api/activities/**").permitAll();
 
             config.requestMatchers(HttpMethod.POST, "/api/persons/**").authenticated();

@@ -33,4 +33,5 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
     boolean existsByEmailIgnoreCase(String email);
     Page<Person> findAll(Pageable pageable);
 
+    Optional<Person> findByResetToken(String resetToken);
 }
