@@ -28,22 +28,26 @@ public class ActivityController {
     @Autowired
     private PersonService personService;
 
-    private final ModelMapper modelMapper = new ModelMapper();
+    private final ModelMapper mapper;
+
+    public ActivityController(ModelMapper mapper) {
+        this.mapper = mapper;
+    }
 
     @GetMapping
-    public ResponseEntity<List<Activity>> getAllActivities() {
-        List<Activity> activities = activityService.findAll();
+    public ResponseEntity<List<ActivityDTO>> getAllActivities() {
+        List<ActivityDTO> activities = activityService.findAll();
         if (activities.isEmpty()) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(activities);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Activity> getActivityById(@PathVariable Long id) {
-        Optional<Activity> activityOpt = activityService.findById(id);
-        return activityOpt.map(ResponseEntity::ok)
+    public ResponseEntity<ActivityDTO> getActivityById(@PathVariable Long id) {
+        return activityService.findById(id)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
-
+/*
     @PostMapping
     public ResponseEntity<ActivityDTO> createActivity(@Valid @RequestBody ActivityDTO dto) {
 
@@ -53,15 +57,15 @@ public class ActivityController {
         Person person = personService.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Authenticated person not found"));
 
-        Activity activity = modelMapper.map(dto, Activity.class);
-        activity.setPerson(person);
+        Activity entity = mapper.map(dto, Activity.class);
+        entity.setPerson(person);
 
-        Activity created = activityService.create(activity);
+        ActivityDTO createdDTO = activityService.create(entity);
 
-        ActivityDTO response = modelMapper.map(created, ActivityDTO.class);
-        response.setPersonId(person.getId());
+        // Ajouter personId dans le DTO
+        createdDTO.setPersonId(person.getId());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdDTO);
     }
 
     @PutMapping("/{id}")
@@ -98,5 +102,5 @@ public class ActivityController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(results);
-    }
+    }*/
 }
