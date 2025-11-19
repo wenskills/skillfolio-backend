@@ -1,9 +1,11 @@
 package app.service;
 
 import app.dao.ActivityRepository;
+import app.dao.PersonRepository;
 import app.dto.ActivityDTO;
 import app.model.Activity;
 import app.model.Person;
+import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,11 +17,13 @@ import java.util.Optional;
 public class ActivityService {
 
     private final ActivityRepository activityRepository;
+    private final PersonRepository personRepository;
     private final ModelMapper mapper;
 
-    public ActivityService(ActivityRepository activityRepository,ModelMapper mapper) {
+    public ActivityService(ActivityRepository activityRepository,ModelMapper mapper, PersonRepository personRepository) {
         this.activityRepository = activityRepository;
         this.mapper = mapper;
+        this.personRepository=personRepository ;
     }
 
     @Transactional(readOnly = true)
@@ -37,22 +41,40 @@ public class ActivityService {
     }
 
     public ActivityDTO create(ActivityDTO dto) {
+        Person person = personRepository.findById(dto.getPersonId())
+                .orElseThrow(() -> new EntityNotFoundException("Person not found with id: " + dto.getPersonId()));
+
         Activity entity = mapper.map(dto, Activity.class);
+
+        entity.setPerson(person);
+        entity.setId(null);
+
         Activity saved = activityRepository.save(entity);
         return mapper.map(saved, ActivityDTO.class);
     }
 
-    public ActivityDTO update(Long id, ActivityDTO updated) {
-        Activity existing = activityRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Activity not found"));
+    public ActivityDTO update(Long id, ActivityDTO dto) {
+        Activity existingActivity = activityRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Activity not found with id: " + id));
 
-        mapper.map(updated, existing); // copie les champs du DTO vers l'entité existante
+        if (dto.getPersonId() != null && !dto.getPersonId().equals(existingActivity.getPerson().getId())) {
+            Person newPerson = personRepository.findById(dto.getPersonId())
+                    .orElseThrow(() -> new EntityNotFoundException("Person not found with id: " + dto.getPersonId()));
+            existingActivity.setPerson(newPerson);
+        }
 
-        Activity saved = activityRepository.save(existing);
+        mapper.map(dto, existingActivity);
+
+        existingActivity.setId(id);
+
+        Activity saved = activityRepository.save(existingActivity);
         return mapper.map(saved, ActivityDTO.class);
     }
 
     public void delete(Long id) {
+        if (!activityRepository.existsById(id)) {
+            throw new EntityNotFoundException("Activity not found with id: " + id);
+        }
         activityRepository.deleteById(id);
     }
 

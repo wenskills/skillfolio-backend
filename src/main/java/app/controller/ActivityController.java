@@ -5,6 +5,7 @@ import app.model.Activity;
 import app.model.Person;
 import app.service.ActivityService;
 import app.service.PersonService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +26,6 @@ public class ActivityController {
     @Autowired
     private ActivityService activityService;
 
-    @Autowired
-    private PersonService personService;
-
-    private final ModelMapper mapper;
-
-    public ActivityController(ModelMapper mapper) {
-        this.mapper = mapper;
-    }
-
     @GetMapping
     public ResponseEntity<List<ActivityDTO>> getAllActivities() {
         List<ActivityDTO> activities = activityService.findAll();
@@ -47,43 +39,20 @@ public class ActivityController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
-/*
     @PostMapping
-    public ResponseEntity<ActivityDTO> createActivity(@Valid @RequestBody ActivityDTO dto) {
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-
-        Person person = personService.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Authenticated person not found"));
-
-        Activity entity = mapper.map(dto, Activity.class);
-        entity.setPerson(person);
-
-        ActivityDTO createdDTO = activityService.create(entity);
-
-        // Ajouter personId dans le DTO
-        createdDTO.setPersonId(person.getId());
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdDTO);
+    public ResponseEntity<ActivityDTO> createActivity(@Valid @RequestBody ActivityDTO activityDTO) {
+        ActivityDTO created = activityService.create(activityDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Activity> updateActivity(@PathVariable Long id, @Valid @RequestBody ActivityDTO dto) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-
-        Activity existing = activityService.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Activity not found"));
-
-        if (!existing.getPerson().getEmail().equals(email)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    public ResponseEntity<ActivityDTO> updateActivity(@PathVariable Long id, @Valid @RequestBody ActivityDTO activityDTO) {
+        try {
+            ActivityDTO updated = activityService.update(id, activityDTO);
+            return ResponseEntity.ok(updated);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
         }
-
-        modelMapper.map(dto, existing);
-
-        Activity updated = activityService.update(id, existing);
-        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
@@ -96,11 +65,7 @@ public class ActivityController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Activity>> searchActivities(@RequestParam String title) {
-        List<Activity> results = activityService.searchByTitle(title);
-        if (results.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(results);
-    }*/
+    public ResponseEntity<List<ActivityDTO>> searchByTitle(@RequestParam String title) {
+        return ResponseEntity.ok(activityService.searchByTitle(title));
+    }
 }

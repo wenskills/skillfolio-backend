@@ -33,4 +33,10 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
     boolean existsByEmailIgnoreCase(String email);
     Page<Person> findAll(Pageable pageable);
 
+    @Query("SELECT DISTINCT p FROM Person p " +
+            "LEFT JOIN p.cv c " +
+            "WHERE LOWER(p.lastName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<Person> searchGlobal(@Param("keyword") String keyword, Pageable pageable);
 }
