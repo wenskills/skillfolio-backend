@@ -1,115 +1,154 @@
 package app.service;
 
+import app.dao.ActivityRepository;
 import app.dao.PersonRepository;
+import app.dto.ActivityDTO;
 import app.model.Activity;
-import app.model.ActivityNature;
 import app.model.Person;
+import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
+import org.modelmapper.ModelMapper;
 
-import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@Transactional
-@ActiveProfiles("open")
 class ActivityServiceTest {
 
-    @Autowired
-    private ActivityService activityService;
-
-    @Autowired
+    private ActivityRepository activityRepository;
     private PersonRepository personRepository;
+    private ModelMapper mapper;
+    private ActivityService service;
 
-    @Test
-    void testCreateAndFindActivity() {
-        Person person = new Person();
-        person.setFirstName("Emma");
-        person.setLastName("Watson");
-        person.setEmail("emma@example.com");
-        person.setPassword("password123");
-        person.setBirthDate(LocalDate.of(1990, 1, 1));
-        personRepository.save(person);
-
-        Activity a = new Activity();
-        a.setYear(2024);
-        a.setNature(ActivityNature.PROJET);
-        a.setTitle("Développement FullStack");
-        a.setDescription("Projet universitaire complet");
-        a.setPerson(person);
-        activityService.create(a);
-
-        Activity found = activityService.findById(a.getId()).orElseThrow();
-        assertThat(found.getTitle()).isEqualTo("Développement FullStack");
-        assertThat(found.getPerson().getEmail()).isEqualTo("emma@example.com");
+    @BeforeEach
+    void setup() {
+        activityRepository = mock(ActivityRepository.class);
+        personRepository = mock(PersonRepository.class);
+        mapper = new ModelMapper();
+        service = new ActivityService(activityRepository, mapper, personRepository);
     }
 
     @Test
-    void testUpdateActivity() {
-        Person p = new Person();
-        p.setFirstName("Max");
-        p.setLastName("Planck");
-        p.setEmail("max@example.com");
-        p.setPassword("password123");
-        personRepository.save(p);
-
+    void testFindAll_ReturnsMappedDTOs() {
         Activity a = new Activity();
-        a.setYear(2023);
-        a.setNature(ActivityNature.EXPERIENCE);
-        a.setTitle("Stage en Java");
-        a.setDescription("Développement backend");
-        a.setPerson(p);
-        activityService.create(a);
+        a.setId(1L);
 
-        a.setTitle("Stage en Spring Boot");
-        Activity updated = activityService.update(a.getId(), a);
+        when(activityRepository.findAll()).thenReturn(List.of(a));
 
-        assertThat(updated.getTitle()).isEqualTo("Stage en Spring Boot");
+        List<ActivityDTO> result = service.findAll();
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(1L);
     }
 
     @Test
-    void testSearchByTitle() {
-        Person p = new Person();
-        p.setFirstName("Nina");
-        p.setLastName("Simone");
-        p.setEmail("nina@example.com");
-        p.setPassword("password123");
-        personRepository.save(p);
-
+    void testFindById_ReturnsDTOWhenExists() {
         Activity a = new Activity();
-        a.setYear(2024);
-        a.setNature(ActivityNature.FORMATION);
-        a.setTitle("Formation VueJS");
-        a.setPerson(p);
-        activityService.create(a);
+        a.setId(1L);
 
-        List<Activity> results = activityService.searchByTitle("vue");
-        assertThat(results).isNotEmpty();
-        assertThat(results.get(0).getTitle()).containsIgnoringCase("VueJS");
+        when(activityRepository.findById(1L)).thenReturn(Optional.of(a));
+
+        Optional<ActivityDTO> result = service.findById(1L);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isEqualTo(1L);
     }
 
     @Test
-    void testDeleteActivity() {
+    void testCreate_ThrowsWhenPersonNotFound() {
+        ActivityDTO dto = new ActivityDTO();
+        dto.setPersonId(50L);
+
+        when(personRepository.findById(50L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.create(dto))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void testCreate_SavesCorrectly() {
+        ActivityDTO dto = new ActivityDTO();
+        dto.setPersonId(5L);
+
         Person p = new Person();
-        p.setFirstName("Paul");
-        p.setLastName("Dirac");
-        p.setEmail("paul@example.com");
-        p.setPassword("password123");
-        personRepository.save(p);
+        p.setId(5L);
 
+        when(personRepository.findById(5L)).thenReturn(Optional.of(p));
+
+        when(activityRepository.save(any(Activity.class))).thenAnswer(inv -> {
+            Activity ac = inv.getArgument(0);
+            ac.setId(10L);
+            return ac;
+        });
+
+        ActivityDTO result = service.create(dto);
+
+        assertThat(result.getId()).isEqualTo(10L);
+    }
+
+    @Test
+    void testUpdate_ThrowsWhenActivityNotFound() {
+        when(activityRepository.findById(10L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.update(10L, new ActivityDTO()))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void testUpdate_UpdatesPersonWhenChanged() {
+        Activity existing = new Activity();
+        existing.setId(1L);
+
+        Person oldPerson = new Person();
+        oldPerson.setId(2L);
+
+        Person newPerson = new Person();
+        newPerson.setId(5L);
+
+        existing.setPerson(oldPerson);
+
+        ActivityDTO dto = new ActivityDTO();
+        dto.setPersonId(5L);
+
+        when(activityRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(personRepository.findById(5L)).thenReturn(Optional.of(newPerson));
+
+        when(activityRepository.save(any(Activity.class))).thenAnswer(i -> i.getArgument(0));
+
+        ActivityDTO result = service.update(1L, dto);
+
+        assertThat(result.getPersonId()).isEqualTo(5L);
+    }
+
+    @Test
+    void testDelete_ThrowsWhenNotFound() {
+        when(activityRepository.existsById(10L)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.delete(10L))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void testDelete_DeletesWhenExists() {
+        when(activityRepository.existsById(10L)).thenReturn(true);
+
+        service.delete(10L);
+
+        verify(activityRepository).deleteById(10L);
+    }
+
+    @Test
+    void testSearchByTitle_ReturnsMappedResults() {
         Activity a = new Activity();
-        a.setYear(2022);
-        a.setNature(ActivityNature.AUTRE);
-        a.setTitle("Hackathon");
-        a.setPerson(p);
-        activityService.create(a);
+        a.setId(3L);
 
-        activityService.delete(a.getId());
-        assertThat(activityService.findById(a.getId())).isEmpty();
+        when(activityRepository.searchByTitle("java")).thenReturn(List.of(a));
+
+        List<ActivityDTO> result = service.searchByTitle("java");
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(3L);
     }
 }

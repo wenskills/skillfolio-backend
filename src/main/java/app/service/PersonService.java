@@ -97,8 +97,9 @@ public class PersonService {
         System.out.println("Délai de traitement de requete : " + (duration / 1000.0) + " sec.");
         return results.map(p -> mapper.map(p, PersonDTO.class));    }
 
-    public Optional<Person> findByEmail(String email) {
-        return personRepository.findByEmailIgnoreCase(email);
+    public Optional<PersonDTO> findByEmail(String email) {
+        return personRepository.findByEmailIgnoreCase(email)
+                .map(person -> mapper.map(person, PersonDTO.class));
     }
 
     @Transactional(readOnly = true)
