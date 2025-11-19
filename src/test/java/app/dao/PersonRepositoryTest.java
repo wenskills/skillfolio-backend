@@ -11,6 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -86,10 +87,10 @@ class PersonRepositoryTest {
         person.setPassword("password123");
         personRepository.save(person);
 
-        var page = personRepository.searchByName("search", PageRequest.of(0, 10));
+        List<Person> page = personRepository.searchByName("search");
 
-        assertThat(page.getContent()).isNotEmpty();
-        assertThat(page.getContent().get(0).getFirstName()).containsIgnoringCase("SearchName");
+        assertThat(page).isNotEmpty();
+        assertThat(page.get(0).getFirstName()).containsIgnoringCase("SearchName");
     }
 
     @Test
@@ -109,10 +110,10 @@ class PersonRepositoryTest {
         a.setPerson(p);
         activityRepository.save(a);
 
-        var page = personRepository.searchByActivity("super", PageRequest.of(0, 10));
+        List<Person> page = personRepository.searchByActivity("super");
 
-        assertThat(page.getContent()).isNotEmpty();
-        assertThat(page.getContent().get(0).getId()).isEqualTo(p.getId());
+        assertThat(page).isNotEmpty();
+        assertThat(page.get(0).getId()).isEqualTo(p.getId());
     }
 
     @Test

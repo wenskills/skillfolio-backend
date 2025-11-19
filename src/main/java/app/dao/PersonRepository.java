@@ -21,13 +21,13 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
         WHERE LOWER(p.firstName) LIKE LOWER(CONCAT('%', :keyword, '%'))
            OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :keyword, '%'))
     """)
-    Page<Person> searchByName(@Param("keyword") String keyword, Pageable pageable);
+    List<Person> searchByName(@Param("keyword") String keyword);
 
     @Query("""
         SELECT DISTINCT a.person FROM Activity a
         WHERE LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
     """)
-    Page<Person> searchByActivity(@Param("keyword") String keyword, Pageable pageable);
+    List<Person> searchByActivity(@Param("keyword") String keyword);
 
     Optional<Person> findByEmailIgnoreCase(String email);
     boolean existsByEmailIgnoreCase(String email);
@@ -39,4 +39,6 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
             "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Person> searchGlobal(@Param("keyword") String keyword, Pageable pageable);
+
+    Optional<Person> findByResetToken(String resetToken);
 }

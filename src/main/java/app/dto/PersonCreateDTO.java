@@ -3,7 +3,6 @@ package app.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,22 +14,20 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PersonFormDTO {
+public class PersonCreateDTO {
+
     @NotBlank(message = "Le nom est obligatoire")
-    String lastName;
+    private String lastName;
 
     @NotBlank(message = "Le prénom est obligatoire")
-    String firstName;
+    private String firstName;
 
     @NotBlank(message = "L'email est obligatoire")
     @Email(message = "Format d'email invalide")
     private String email;
 
-    String website;
+    private String website;
 
     @Past(message = "La date de naissance doit être dans le passé")
-    LocalDate birthDate;
-
-    @Size(min = 8, message = "Le mot de passe doit faire au moins 8 caractères")
-    String password;
+    private LocalDate birthDate;
 }

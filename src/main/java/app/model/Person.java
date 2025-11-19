@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +45,7 @@ public class Person {
 
     private String website;
 
+    @Past(message = "La date de naissance doit être dans le passé")
     private LocalDate birthDate;
 
     @NotBlank
@@ -53,5 +56,7 @@ public class Person {
     @JsonManagedReference
     private List<Activity> cv = new ArrayList<>();
 
+    private String resetToken;
+    private LocalDateTime resetTokenExpiration;
 
 }

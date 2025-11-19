@@ -62,11 +62,17 @@ public class JwtWebSecurityConfig {
         http.authorizeHttpRequests(config -> {
             config.dispatcherTypeMatchers(DispatcherType.FORWARD).permitAll();
 
+            config.requestMatchers(
+                    "/frontend/**",
+                    "/frontend/index.html",
+                    "/index.html",
+                    "/",
+                    "/favicon.ico"
+            ).permitAll();
 
             config.requestMatchers("/auth/**").permitAll();
-
+            config.requestMatchers("api/persons/reset-password").permitAll();
             config.requestMatchers(HttpMethod.GET, "/api/persons/**", "/api/activities/**").permitAll();
-
             config.requestMatchers(HttpMethod.POST, "/api/persons/**").authenticated();
             config.requestMatchers(HttpMethod.PUT, "/api/persons/**").authenticated();
             config.requestMatchers(HttpMethod.POST, "/api/activities/**").authenticated();

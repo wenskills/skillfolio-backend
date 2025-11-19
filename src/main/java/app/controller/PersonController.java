@@ -1,8 +1,6 @@
 package app.controller;
 
-import app.dto.ActivityDTO;
-import app.dto.PersonDTO;
-import app.dto.PersonFormDTO;
+import app.dto.*;
 import app.model.Activity;
 import app.model.Person;
 import app.service.PersonService;
@@ -47,11 +45,11 @@ public class PersonController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public ResponseEntity<PersonDTO> createPerson(@Valid @RequestBody PersonDTO personDTO) {
-        PersonDTO created = personService.create(personDTO);
+    /*@PostMapping
+    public ResponseEntity<PersonFormDTO> createPerson(@Valid @RequestBody PersonFormDTO personDTO) {
+        PersonFormDTO created = personService.create(personDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
-    }
+    }*/
 
     @PutMapping("/me")
     public ResponseEntity<PersonDTO> updatePerson(
@@ -101,6 +99,30 @@ public class PersonController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @PostMapping
+    public ResponseEntity<?> create(@Valid @RequestBody PersonCreateDTO dto) {
+        try {
+            PersonDTO created = personService.createViaCooptation(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordDTO dto) {
+        try {
+            boolean ok = personService.resetPassword(dto);
+            if (!ok)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token invalide ou expiré");
+
+            return ResponseEntity.ok("Mot de passe modifié avec succès");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 
 
 }

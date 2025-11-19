@@ -36,8 +36,8 @@ public class DataInitializer {
     private final Faker faker = new Faker();
     private final Random random = new Random();
 
-    private static final int TOTAL = 100_000;
-    private static final int BATCH_SIZE = 500;
+    private static final int TOTAL = 10;
+    private static final int BATCH_SIZE = 5;
 
     @PostConstruct
     public void initData() {
@@ -49,6 +49,7 @@ public class DataInitializer {
         List<Activity> actsBatch = new ArrayList<>(BATCH_SIZE * 4);
 
         System.out.println("Génération de " + TOTAL + " personnes");
+        System.out.println(" Chargement ...");
 
         for (int i = 0; i < TOTAL; i++) {
 
@@ -90,7 +91,6 @@ public class DataInitializer {
 
                 activityRepository.saveAll(actsBatch);
 
-                System.out.println(" Batch " + BATCH_SIZE + " fait");
 
                 personsBatch.clear();
                 actsBatch.clear();
