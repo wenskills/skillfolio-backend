@@ -1,0 +1,8 @@
+app\dao\ActivityRepositoryTest.class
+app\controller\PersonControllerTest.class
+app\security\JwtSecurityIntegrationTest.class
+app\controller\ActivityControllerTest.class
+app\service\PersonServiceTest.class
+app\controller\PersonAuthControllerTest.class
+app\dao\PersonRepositoryTest.class
+app\service\ActivityServiceTest.class

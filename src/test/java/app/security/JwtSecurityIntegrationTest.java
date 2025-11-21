@@ -3,15 +3,20 @@ package app.security;
 import app.dao.PersonRepository;
 import app.model.Person;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -31,10 +36,20 @@ class JwtSecurityIntegrationTest {
     @Autowired
     private JwtUserService jwtUserService;
 
+    @MockitoBean
+    private JavaMailSender mailSender;
+
     private String token;
 
     @BeforeEach
     void setup(@Autowired JwtUserService jwtPersonService) {
+        MimeMessage fakeMessage = mock(MimeMessage.class);
+
+        when(mailSender.createMimeMessage())
+                .thenReturn(fakeMessage);
+
+        doNothing().when(mailSender).send(any(MimeMessage.class));
+
         personRepository.deleteAll();
         Person person = new Person();
         person.setFirstName("Wendy");
@@ -60,6 +75,7 @@ class JwtSecurityIntegrationTest {
         person.setEmail("noauth@example.com");
         person.setPassword("test123");
 
+
         mvc.perform(post("/api/persons")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(person)))
@@ -73,6 +89,7 @@ class JwtSecurityIntegrationTest {
         person.setLastName("User");
         person.setEmail("auth@example.com");
         person.setPassword("password123");
+
 
         mvc.perform(post("/api/persons")
                         .header("Authorization", "Bearer " + token)

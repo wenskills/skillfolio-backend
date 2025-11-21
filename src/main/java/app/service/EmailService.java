@@ -3,6 +3,7 @@ package app.service;
 import app.model.Person;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -19,11 +20,17 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
+    @Value("${frontend.base-url}")
+    private String frontendBaseUrl;
+
     public void sendWelcomeEmail(Person p, String tempPassword, String resetToken) {
 
-        String loginLink = "http://localhost:5173/frontend#login";
+        /*String loginLink = "http://localhost:5173/frontend#login";
         String resetLink = "http://localhost:5173/frontend#reset-password?token"
-                +"="+ resetToken;
+                +"="+ resetToken;*/
+        String loginLink = frontendBaseUrl + "#login";
+        String resetLink = frontendBaseUrl + "#reset-password?token"
+                +"=" + resetToken;
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
@@ -48,7 +55,7 @@ public class EmailService {
             mailSender.send(message);
 
         } catch (Exception e) {
-            throw new RuntimeException("L'email n'a pas pu être envoyé. La personne n'a pas pu être créée. Veuillez réessayer ultérieurement.");
+            throw new RuntimeException("Une erreur est survenue lors de l'envoi du mail. La personne n'a pas pu être créée. Veuillez réessayer ultérieurement.");
 
         }
     }

@@ -5,6 +5,7 @@ import app.dto.PersonDTO;
 import app.dto.PersonFormDTO;
 import app.model.Person;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,15 +14,19 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 
 import org.springframework.http.MediaType;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -42,8 +47,18 @@ class PersonControllerTest {
 
     private Person existingPerson;
 
+    @MockitoBean
+    private JavaMailSender mailSender;
+
     @BeforeEach
     void setup() {
+        MimeMessage fakeMessage = mock(MimeMessage.class);
+
+        when(mailSender.createMimeMessage())
+                .thenReturn(fakeMessage);
+
+        doNothing().when(mailSender).send(any(MimeMessage.class));
+
         personRepository.deleteAll();
 
         existingPerson = new Person();

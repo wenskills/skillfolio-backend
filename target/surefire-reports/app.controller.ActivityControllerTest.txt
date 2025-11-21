@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: app.controller.ActivityControllerTest
+-------------------------------------------------------------------------------
+Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.60 s -- in app.controller.ActivityControllerTest

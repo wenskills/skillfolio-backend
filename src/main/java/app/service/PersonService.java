@@ -8,6 +8,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -139,7 +140,7 @@ public class PersonService {
     public PersonDTO createViaCooptation(PersonCreateDTO dto) {
 
         if (personRepository.existsByEmailIgnoreCase(dto.getEmail())) {
-            throw new IllegalArgumentException("Email déjà utilisé");
+            throw new DataIntegrityViolationException("Email déjà utilisé");
         }
 
         Person p = new Person();

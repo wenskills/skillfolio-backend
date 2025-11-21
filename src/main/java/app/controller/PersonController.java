@@ -90,12 +90,8 @@ public class PersonController {
 
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody PersonCreateDTO dto) {
-        try {
-            PersonDTO created = personService.createViaCooptation(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(created);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+        PersonDTO created = personService.createViaCooptation(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PostMapping("/reset-password")
