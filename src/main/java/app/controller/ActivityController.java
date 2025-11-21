@@ -19,6 +19,9 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
+/************
+ * Contrôleur REST destiné à la gestion des activités du CV d'une personne
+ * ************/
 @RestController
 @RequestMapping("/api/activities")
 public class ActivityController {
@@ -64,8 +67,4 @@ public class ActivityController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<ActivityDTO>> searchByTitle(@RequestParam String title) {
-        return ResponseEntity.ok(activityService.searchByTitle(title));
-    }
 }

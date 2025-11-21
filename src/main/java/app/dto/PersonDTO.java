@@ -10,6 +10,10 @@ import lombok.*;
 import java.time.LocalDate;
 import java.util.List;
 
+/*****************
+ * Données envoyées au front pour une personne
+ * => pas de mot de passe : donnée sensible!
+ * *********************/
 @Getter
 @Setter
 @AllArgsConstructor
@@ -32,10 +36,6 @@ public class PersonDTO {
 
     @Past(message = "La date de naissance doit être dans le passé")
     LocalDate birthDate;
-
-    @NotBlank
-    @Size(min = 8, message = "Le mot de passe doit faire au moins 8 caractères")
-    String password;
 
     List<ActivityDTO> cv;
 }

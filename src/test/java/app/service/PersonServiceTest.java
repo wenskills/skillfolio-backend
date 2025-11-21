@@ -64,7 +64,7 @@ class PersonServiceTest {
 
     @Test
     void testCreate_ThrowsWhenEmailAlreadyExists() {
-        PersonDTO dto = new PersonDTO();
+        PersonFormDTO dto = new PersonFormDTO();
         dto.setEmail("dup@test.com");
 
         when(personRepository.findByEmailIgnoreCase("dup@test.com"))
@@ -77,7 +77,7 @@ class PersonServiceTest {
 
     @Test
     void testCreate_SavesPersonSuccessfully() {
-        PersonDTO dto = new PersonDTO();
+        PersonFormDTO dto = new PersonFormDTO();
         dto.setEmail("new@test.com");
         dto.setPassword("pwd");
 

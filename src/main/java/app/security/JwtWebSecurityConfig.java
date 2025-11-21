@@ -27,6 +27,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import jakarta.servlet.DispatcherType;
 
+/*************
+ * Configuration de sécurité
+ * => GET : authorisé
+ * => PUT/POST/DELETE : authentifié
+ * => authentification, documentation : authoristé
+ * ****************/
 @Configuration
 @EnableWebSecurity
 @Profile("usejwt")
@@ -68,6 +74,11 @@ public class JwtWebSecurityConfig {
                     "/index.html",
                     "/",
                     "/favicon.ico"
+            ).permitAll();
+            config.requestMatchers(
+                    "/v3/api-docs/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html"
             ).permitAll();
 
             config.requestMatchers("/auth/**").permitAll();

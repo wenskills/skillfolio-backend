@@ -5,9 +5,6 @@ import app.model.Activity;
 import app.model.ActivityNature;
 import app.model.Person;
 import app.dao.PersonRepository;
-import app.security.JwtUserService;
-import app.service.ActivityService;
-import app.service.PersonService;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -20,6 +17,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/***********
+ * Initialisation de notre base de donnée
+ * => utilisation de faker pour génerer les données:
+ * ====> utilisateurs : nom, prénom, website, birthdate
+ * ====> activity : title, description
+ *
+ * => Metrics: 100_000 personnes, avec 2 à 5 activités par personnes
+ * ***************************/
 @Component
 @Profile("usejwt")
 public class DataInitializer {
@@ -36,7 +41,7 @@ public class DataInitializer {
     private final Faker faker = new Faker();
     private final Random random = new Random();
 
-    private static final int TOTAL = 10;
+    private static final int TOTAL = 100_000;
     private static final int BATCH_SIZE = 5;
 
     @PostConstruct
@@ -49,15 +54,14 @@ public class DataInitializer {
         List<Activity> actsBatch = new ArrayList<>(BATCH_SIZE * 4);
 
         System.out.println("Génération de " + TOTAL + " personnes");
-        System.out.println(" Chargement ...");
-
+        System.out.println("Chargement en cours, merci de patienter...");
         for (int i = 0; i < TOTAL; i++) {
 
             Person p = new Person();
             p.setFirstName(faker.name().firstName());
             p.setLastName(faker.name().lastName());
             p.setEmail("user" + i + "@test.com");
-            p.setWebsite(faker.internet().url());
+            p.setWebsite("https://" + faker.internet().url());
             p.setBirthDate(LocalDate.of(
                     1970 + random.nextInt(30),
                     1 + random.nextInt(12),
@@ -90,7 +94,6 @@ public class DataInitializer {
                 }
 
                 activityRepository.saveAll(actsBatch);
-
 
                 personsBatch.clear();
                 actsBatch.clear();

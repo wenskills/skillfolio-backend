@@ -64,7 +64,7 @@ class PersonControllerTest {
     @Test
     void testCreatePerson() throws Exception {
 
-        PersonDTO dto = new PersonDTO();
+        PersonFormDTO dto = new PersonFormDTO();
         dto.setFirstName("Bob");
         dto.setLastName("Marley");
         dto.setEmail("bob@test.com");

@@ -86,6 +86,7 @@ class ActivityControllerTest {
         activityRepository.save(activity2);
     }
 
+    @Test
     void testCreateActivity_Success() throws Exception {
         ActivityDTO dto = new ActivityDTO();
         dto.setYear(2025);
@@ -149,6 +150,7 @@ class ActivityControllerTest {
     }
 
 
+    @Test
     void testUpdateActivity_Success() throws Exception {
         ActivityDTO updateDTO = new ActivityDTO();
         updateDTO.setYear(2024);
@@ -167,6 +169,7 @@ class ActivityControllerTest {
     }
 
 
+    @Test
     void testUpdateActivity_NotFound() throws Exception {
         ActivityDTO dto = new ActivityDTO();
         dto.setYear(2025);

@@ -13,7 +13,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-/*******Pour les tests unitaires ********/
+/*******Profil spécifique POUR LES TESTS CONTROLLERS
+ * qui permet de pas se soucier des tokens, les filtres, les règles d'accès et les auth
+ * ********/
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
@@ -32,7 +34,6 @@ public class SpringSecurityOpen {
         http.authorizeHttpRequests(config -> {
             config.anyRequest().permitAll();
         });
-        // no CSRF check
         http.csrf(config -> {
             config.disable();
         });

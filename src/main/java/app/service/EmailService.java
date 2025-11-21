@@ -8,6 +8,11 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+/************
+ * SYSTEME D'ENVOI DE MAIL AUTOMATIQUE
+ * principalement lors de la cooptation
+ * => envoi des identifiants et liens pour se connecter et réinitialisation du mdp
+ * ***********/
 @Service
 public class EmailService {
 
@@ -19,7 +24,6 @@ public class EmailService {
         String loginLink = "http://localhost:5173/frontend#login";
         String resetLink = "http://localhost:5173/frontend#reset-password?token"
                 +"="+ resetToken;
-        System.out.println(resetToken);
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
@@ -28,13 +32,13 @@ public class EmailService {
             helper.setSubject("Bienvenue sur CVamu !");
 
             String text =
-                    "Bonjour " + p.getFirstName() + ",\n\n" +
-                            "Un compte a été créé pour vous.\n\n" +
-                            "Voici vos identifiants provisoires :\n" +
-                            "- Email : " + p.getEmail() + "\n" +
-                            "- Mot de passe : " + tempPassword + "\n\n" +
-                            "Connexion : " + loginLink + "\n" +
-                            "Réinitialisation du mot de passe : " + resetLink + "\n\n" +
+                    "Bonjour " + p.getFirstName() + ", \n\n " +
+                            "Un compte a été créé pour vous.\n\n " +
+                            "Voici vos identifiants provisoires :\n " +
+                            "- Email : " + p.getEmail() + "\n " +
+                            "- Mot de passe : " + tempPassword + "\n\n " +
+                            "Connectez-vous dès maintenant : " + loginLink + "\n " +
+                            "Pour des raisons de securités, nous vous conseillons de modifier votre mot de passe : " + resetLink + "\n\n" +
                             "Cordialement,\n" +
                             "L'équipe CVamu";
 
@@ -44,7 +48,8 @@ public class EmailService {
             mailSender.send(message);
 
         } catch (Exception e) {
-            throw new RuntimeException("Erreur lors de l'envoi du mail", e);
+            throw new RuntimeException("L'email n'a pas pu être envoyé. La personne n'a pas pu être créée. Veuillez réessayer ultérieurement.");
+
         }
     }
 }

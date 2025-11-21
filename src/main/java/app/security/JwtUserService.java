@@ -83,6 +83,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/*************Gestion d'authentification utilisateur****************/
 @Service
 @Profile("usejwt")
 public class JwtUserService {
@@ -108,7 +109,6 @@ public class JwtUserService {
             Person person = personRepository.findByEmailIgnoreCase(email)
                     .orElseThrow(() -> new JwtException("Person not found"));
 
-            // Crée un JWT avec le rôle "USER"
             return jwtTokenProvider.createToken(email, "USER");
 
         } catch (AuthenticationException e) {

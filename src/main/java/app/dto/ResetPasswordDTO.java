@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**************
+ * Données pour la réinitialisation du mot de passe
+ * *******************/
 @Getter
 @Setter
 @AllArgsConstructor

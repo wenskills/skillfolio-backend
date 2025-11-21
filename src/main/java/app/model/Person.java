@@ -13,6 +13,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/************
+ * ENTITE PERSONNE
+ * => nom, prenom, email, password obligatoire
+ * => site web, date de naissance, cv, token : facultatif
+ * **************/
 @Entity
 @Table(
         indexes = {

@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
+/***************
+ *  Contrôleur REST responsable de l'authentification
+ *  et de la gestion des tokens JWT.
+ * ******************/
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin(origins = "*")

@@ -24,6 +24,9 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Stream;
 
+/**************
+ *  GESTION METIER DES PERSONNES
+ * ****************/
 @Service
 @Transactional
 public class PersonService {
@@ -57,7 +60,7 @@ public class PersonService {
                 .map(person -> mapper.map(person, PersonDTO.class));
     }
 
-    public PersonDTO create(PersonDTO dto) {
+    public PersonDTO create(PersonFormDTO dto) {
         if (personRepository.findByEmailIgnoreCase(dto.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Cet email est déjà utilisé.");
         }
@@ -99,8 +102,7 @@ public class PersonService {
         List<Person> activityMatches = personRepository.searchByActivity(keyword);
 
         Set<Person> merged = new LinkedHashSet<>();
-        merged.addAll(nameMatches);
-        merged.addAll(activityMatches);
+        merged.addAll(nameMatches); merged.addAll(activityMatches);
 
         List<Person> mergedList = new ArrayList<>(merged);
 

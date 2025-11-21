@@ -24,9 +24,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private JwtProvider jwtTokenProvider;
 
     public JwtFilter(JwtProvider jwtTokenProvider) {
-        logger.info("entering JwtFilter");
         this.jwtTokenProvider = jwtTokenProvider;
-        logger.info("+++ Init JWT filter");
     }
 
     public String extractToken(HttpServletRequest req) {
@@ -44,7 +42,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
         logger.info("entering JwtFilter");
         String token = extractToken(httpServletRequest);
-        logger.info("token extracted");
         try {
             if (token != null && jwtTokenProvider.validateToken(token)) {
                 Authentication auth = jwtTokenProvider.getAuthentication(token);

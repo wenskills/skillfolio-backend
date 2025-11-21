@@ -6,6 +6,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+/**************
+ * ENTITE ACTIVITE
+ * => titre, année d'activité, type obligatoire
+ * => description, site web facultatif
+ * ***************/
 @Entity
 @Table(
         indexes = {

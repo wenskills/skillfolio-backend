@@ -131,6 +131,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.util.*;
 
+/********** Gestion des tokens JWT************/
 @Component
 @Profile("usejwt")
 public class JwtProvider {

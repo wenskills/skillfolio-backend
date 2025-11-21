@@ -11,6 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.Map;
 
+/**************
+ *
+ * Gestion des erreurs rest
+ *
+ * ********************/
 @RestControllerAdvice(annotations = RestController.class)
 public class RestErrorController {
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -32,6 +37,15 @@ public class RestErrorController {
         errors.put("email", "Cet email est déjà utilisé.");
         return errors;
     }
+
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleRuntime(RuntimeException e) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", e.getMessage());
+        return error;
+    }
+
 
 
 }

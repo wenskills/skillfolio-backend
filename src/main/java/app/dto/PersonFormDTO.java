@@ -11,6 +11,11 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
+/*****************
+ * Données envoyées par le front lors du formulaire de modification des informations
+ * personnelles de l'utilisateur
+ *=> l'utilisateur peut modifier ou pas son mot de passe
+ * ********************/
 @Getter
 @Setter
 @AllArgsConstructor

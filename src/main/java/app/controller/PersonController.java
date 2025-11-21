@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+/**********
+ *Contrôleur REST gérant les opérations liées aux personnes.
+ * ************/
 @RestController
 @RequestMapping("/api/persons")
 public class PersonController {
@@ -45,11 +48,6 @@ public class PersonController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /*@PostMapping
-    public ResponseEntity<PersonFormDTO> createPerson(@Valid @RequestBody PersonFormDTO personDTO) {
-        PersonFormDTO created = personService.create(personDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
-    }*/
 
     @PutMapping("/me")
     public ResponseEntity<PersonDTO> updatePerson(
@@ -89,16 +87,6 @@ public class PersonController {
         return ResponseEntity.ok(personService.search(keyword, page, size));
     }
 
-
-    @GetMapping("/{id}/activities")
-    public ResponseEntity<List<ActivityDTO>> getActivitiesByPerson(@PathVariable Long id) {
-        try {
-            List<ActivityDTO> activities = personService.getActivitiesByPersonId(id);
-            return ResponseEntity.ok(activities);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
 
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody PersonCreateDTO dto) {

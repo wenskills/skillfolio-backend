@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+/************* Gestion des erreurs d'authentification****************/
 @RestControllerAdvice
 public class JwtExceptionHandler {
 
