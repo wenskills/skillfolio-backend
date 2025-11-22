@@ -42,7 +42,7 @@ public class DataInitializer {
     private final Random random = new Random();
 
     private static final int TOTAL = 100_000;
-    private static final int BATCH_SIZE = 5;
+    private static final int BATCH_SIZE = 500;
 
     @PostConstruct
     public void initData() {
