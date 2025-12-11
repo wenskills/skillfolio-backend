@@ -12,10 +12,10 @@ import jakarta.servlet.http.HttpServletResponse;
 @RestControllerAdvice
 public class JwtExceptionHandler {
 
-    @ExceptionHandler(JwtException.class)
-    public void handleCustomException(HttpServletResponse res, JwtException ex) throws IOException {
-        res.sendError(ex.getStatusCode().value(), ex.getMessage());
-    }
+//    @ExceptionHandler(JwtException.class)
+//    public void handleCustomException(HttpServletResponse res, JwtException ex) throws IOException {
+//        res.sendError(ex.getStatusCode().value(), ex.getMessage());
+//    }
 
     @ExceptionHandler(AccessDeniedException.class)
     public void handleAccessDeniedException(HttpServletResponse res) throws IOException {
