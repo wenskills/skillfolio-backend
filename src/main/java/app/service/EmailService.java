@@ -20,17 +20,14 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    @Value("${frontend.base-url}")
-    private String frontendBaseUrl;
-
     public void sendWelcomeEmail(Person p, String tempPassword, String resetToken) {
 
-        /*String loginLink = "http://localhost:5173/frontend#login";
+        String loginLink = "http://localhost:5173/frontend#login";
         String resetLink = "http://localhost:5173/frontend#reset-password?token"
-                +"="+ resetToken;*/
-        String loginLink = frontendBaseUrl + "#login";
-        String resetLink = frontendBaseUrl + "#reset-password?token"
-                +"=" + resetToken;
+                +"="+ resetToken;
+//        String loginLink = frontendBaseUrl + "#login";
+//        String resetLink = frontendBaseUrl + "#reset-password?token"
+//                +"=" + resetToken;
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");

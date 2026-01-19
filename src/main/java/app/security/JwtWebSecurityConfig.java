@@ -82,7 +82,7 @@ public class JwtWebSecurityConfig {
             ).permitAll();
 
             config.requestMatchers("/auth/**").permitAll();
-            config.requestMatchers("api/persons/reset-password").permitAll();
+            config.requestMatchers("/api/persons/reset-password").permitAll();
             config.requestMatchers(HttpMethod.GET, "/api/persons/**", "/api/activities/**").permitAll();
             config.requestMatchers(HttpMethod.POST, "/api/persons/**").authenticated();
             config.requestMatchers(HttpMethod.PUT, "/api/persons/**").authenticated();
