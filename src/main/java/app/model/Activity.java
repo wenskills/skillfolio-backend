@@ -44,8 +44,10 @@ public class Activity {
 
     private String webAddress;
 
+    private Integer position = 0;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "person_id", nullable = false)
-    @JsonBackReference
-    private Person person;
+    @JoinColumn(name = "resume_id")
+    @JsonBackReference(value = "resume-activities")
+    private Resume resume;
 }

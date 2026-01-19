@@ -12,10 +12,13 @@ import java.util.List;
 @Repository
 @Transactional
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
+
+    List<Activity> findByResumeIdOrderByYearDesc(Long resumeId);
+
     @Query("""
        SELECT a FROM Activity a
        WHERE LOWER(a.title) LIKE LOWER(CONCAT('%', :title, '%'))
        """)
     List<Activity> searchByTitle(@Param("title") String title);
-
 }
+

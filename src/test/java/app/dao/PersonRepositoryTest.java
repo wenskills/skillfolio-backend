@@ -3,10 +3,10 @@ package app.dao;
 import app.model.Activity;
 import app.model.ActivityNature;
 import app.model.Person;
+import app.model.Resume;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +26,9 @@ class PersonRepositoryTest {
 
     @Autowired
     private ActivityRepository activityRepository;
+
+    @Autowired
+    private ResumeRepository resumeRepository;
 
     @Test
     void testCreateAndReadPerson() {
@@ -79,7 +82,6 @@ class PersonRepositoryTest {
 
     @Test
     void testSearchByName() {
-
         Person person = new Person();
         person.setFirstName("SearchName");
         person.setLastName("Test");
@@ -95,7 +97,6 @@ class PersonRepositoryTest {
 
     @Test
     void testSearchByActivity() {
-
         Person p = new Person();
         p.setFirstName("Act");
         p.setLastName("Person");
@@ -103,11 +104,16 @@ class PersonRepositoryTest {
         p.setPassword("password123");
         personRepository.save(p);
 
+        Resume resume = new Resume();
+        resume.setOwner(p);
+        resume.setTitle("CV principal");
+        resumeRepository.save(resume);
+
         Activity a = new Activity();
         a.setTitle("SuperActivityTest");
         a.setYear(2024);
         a.setNature(ActivityNature.PROJET);
-        a.setPerson(p);
+        a.setResume(resume);
         activityRepository.save(a);
 
         List<Person> page = personRepository.searchByActivity("super");
@@ -118,7 +124,6 @@ class PersonRepositoryTest {
 
     @Test
     void testFindByEmailIgnoreCase() {
-
         Person p = new Person();
         p.setFirstName("Mail");
         p.setLastName("Test");
@@ -134,7 +139,6 @@ class PersonRepositoryTest {
 
     @Test
     void testExistsByEmailIgnoreCase() {
-
         Person p = new Person();
         p.setFirstName("Check");
         p.setLastName("Email");
@@ -146,5 +150,4 @@ class PersonRepositoryTest {
 
         assertThat(exists).isTrue();
     }
-
 }

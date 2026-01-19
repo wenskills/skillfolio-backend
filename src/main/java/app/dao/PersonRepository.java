@@ -17,7 +17,7 @@ import java.util.Optional;
 @Repository
 @Transactional
 public interface PersonRepository extends JpaRepository<Person, Long> {
-    @EntityGraph(attributePaths = "cv")
+
     @Query("""
         SELECT p FROM Person p
         WHERE LOWER(p.firstName) LIKE LOWER(CONCAT('%', :keyword, '%'))
@@ -25,9 +25,9 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
     """)
     List<Person> searchByName(@Param("keyword") String keyword);
 
-    @EntityGraph(attributePaths = "cv")
     @Query("""
-        SELECT DISTINCT a.person FROM Activity a
+        SELECT DISTINCT r.owner FROM Activity a
+        JOIN a.resume r
         WHERE LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
     """)
     List<Person> searchByActivity(@Param("keyword") String keyword);
@@ -35,13 +35,14 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
     Optional<Person> findByEmailIgnoreCase(String email);
     boolean existsByEmailIgnoreCase(String email);
 
-    Page<Person> findAll(Pageable pageable);
-
-    @Query("SELECT DISTINCT p FROM Person p " +
-            "LEFT JOIN p.cv c " +
-            "WHERE LOWER(p.lastName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    @Query("""
+        SELECT DISTINCT p FROM Person p
+        LEFT JOIN p.resumes r
+        LEFT JOIN r.activities c
+        WHERE LOWER(p.lastName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+           OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+           OR LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+    """)
     Page<Person> searchGlobal(@Param("keyword") String keyword, Pageable pageable);
 
     Optional<Person> findByResetToken(String resetToken);

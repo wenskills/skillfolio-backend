@@ -1,16 +1,17 @@
 package app.service;
 
 import app.dao.ActivityRepository;
-import app.dao.PersonRepository;
+import app.dao.ResumeRepository;
 import app.dto.ActivityDTO;
 import app.model.Activity;
-import app.model.Person;
+import app.model.Resume;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -18,16 +19,16 @@ import static org.mockito.Mockito.*;
 class ActivityServiceTest {
 
     private ActivityRepository activityRepository;
-    private PersonRepository personRepository;
+    private ResumeRepository resumeRepository;
     private ModelMapper mapper;
     private ActivityService service;
 
     @BeforeEach
     void setup() {
         activityRepository = mock(ActivityRepository.class);
-        personRepository = mock(PersonRepository.class);
+        resumeRepository = mock(ResumeRepository.class);
         mapper = new ModelMapper();
-        service = new ActivityService(activityRepository, mapper, personRepository);
+        service = new ActivityService(activityRepository, mapper, resumeRepository);
     }
 
     @Test
@@ -57,11 +58,11 @@ class ActivityServiceTest {
     }
 
     @Test
-    void testCreate_ThrowsWhenPersonNotFound() {
+    void testCreate_ThrowsWhenResumeNotFound() {
         ActivityDTO dto = new ActivityDTO();
-        dto.setPersonId(50L);
+        dto.setResumeId(50L);
 
-        when(personRepository.findById(50L)).thenReturn(Optional.empty());
+        when(resumeRepository.findById(50L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.create(dto))
                 .isInstanceOf(EntityNotFoundException.class);
@@ -70,22 +71,24 @@ class ActivityServiceTest {
     @Test
     void testCreate_SavesCorrectly() {
         ActivityDTO dto = new ActivityDTO();
-        dto.setPersonId(5L);
+        dto.setResumeId(5L);
 
-        Person p = new Person();
-        p.setId(5L);
+        Resume r = new Resume();
+        r.setId(5L);
 
-        when(personRepository.findById(5L)).thenReturn(Optional.of(p));
+        when(resumeRepository.findById(5L)).thenReturn(Optional.of(r));
 
         when(activityRepository.save(any(Activity.class))).thenAnswer(inv -> {
             Activity ac = inv.getArgument(0);
             ac.setId(10L);
+            ac.setResume(r);
             return ac;
         });
 
         ActivityDTO result = service.create(dto);
 
         assertThat(result.getId()).isEqualTo(10L);
+        assertThat(result.getResumeId()).isEqualTo(5L);
     }
 
     @Test
@@ -97,29 +100,29 @@ class ActivityServiceTest {
     }
 
     @Test
-    void testUpdate_UpdatesPersonWhenChanged() {
+    void testUpdate_UpdatesResumeWhenChanged() {
         Activity existing = new Activity();
         existing.setId(1L);
 
-        Person oldPerson = new Person();
-        oldPerson.setId(2L);
+        Resume oldResume = new Resume();
+        oldResume.setId(2L);
 
-        Person newPerson = new Person();
-        newPerson.setId(5L);
+        Resume newResume = new Resume();
+        newResume.setId(5L);
 
-        existing.setPerson(oldPerson);
+        existing.setResume(oldResume);
 
         ActivityDTO dto = new ActivityDTO();
-        dto.setPersonId(5L);
+        dto.setResumeId(5L);
 
         when(activityRepository.findById(1L)).thenReturn(Optional.of(existing));
-        when(personRepository.findById(5L)).thenReturn(Optional.of(newPerson));
+        when(resumeRepository.findById(5L)).thenReturn(Optional.of(newResume));
 
         when(activityRepository.save(any(Activity.class))).thenAnswer(i -> i.getArgument(0));
 
         ActivityDTO result = service.update(1L, dto);
 
-        assertThat(result.getPersonId()).isEqualTo(5L);
+        assertThat(result.getResumeId()).isEqualTo(5L);
     }
 
     @Test

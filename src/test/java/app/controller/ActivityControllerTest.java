@@ -2,10 +2,12 @@ package app.controller;
 
 import app.dao.ActivityRepository;
 import app.dao.PersonRepository;
+import app.dao.ResumeRepository;
 import app.dto.ActivityDTO;
 import app.model.Activity;
 import app.model.ActivityNature;
 import app.model.Person;
+import app.model.Resume;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,15 +46,21 @@ class ActivityControllerTest {
     @Autowired
     private PersonRepository personRepository;
 
+    @Autowired
+    private ResumeRepository resumeRepository;
+
     private ModelMapper modelMapper;
 
     private Person person;
+    private Resume resume;
+
     private Activity activity1;
     private Activity activity2;
 
     @BeforeEach
     void setUp() {
         activityRepository.deleteAll();
+        resumeRepository.deleteAll();
         personRepository.deleteAll();
 
         person = new Person();
@@ -67,20 +75,25 @@ class ActivityControllerTest {
                 new UsernamePasswordAuthenticationToken(person.getEmail(), null, List.of())
         );
 
+        // ✅ Nouveau : CV (Resume) par défaut pour les activités
+        resume = new Resume();
+        resume.setOwner(person);
+        resume.setTitle("CV principal");
+        resumeRepository.save(resume);
 
         activity1 = new Activity();
         activity1.setYear(2024);
         activity1.setNature(ActivityNature.PROJET);
         activity1.setTitle("Spring Boot API");
         activity1.setDescription("Développement API CVs");
-        activity1.setPerson(person);
+        activity1.setResume(resume);
 
         activity2 = new Activity();
         activity2.setYear(2023);
         activity2.setNature(ActivityNature.FORMATION);
         activity2.setTitle("Formation React");
         activity2.setDescription("Front-end moderne");
-        activity2.setPerson(person);
+        activity2.setResume(resume);
 
         activityRepository.save(activity1);
         activityRepository.save(activity2);
@@ -93,7 +106,7 @@ class ActivityControllerTest {
         dto.setNature(ActivityNature.EXPERIENCE);
         dto.setTitle("Stage Dev");
         dto.setDescription("Stage en entreprise");
-        dto.setPersonId(person.getId());
+        dto.setResumeId(resume.getId()); // ✅
 
         mvc.perform(post("/api/activities")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -102,7 +115,7 @@ class ActivityControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.title").value("Stage Dev"))
                 .andExpect(jsonPath("$.nature").value("EXPERIENCE"))
-                .andExpect(jsonPath("$.personId").value(person.getId()));
+                .andExpect(jsonPath("$.resumeId").value(resume.getId())); // ✅
 
         assertThat(activityRepository.findAll()).hasSize(3);
     }
@@ -113,7 +126,7 @@ class ActivityControllerTest {
         invalid.setYear(null);
         invalid.setNature(null);
         invalid.setTitle("");
-        invalid.setPersonId(person.getId());
+        invalid.setResumeId(resume.getId()); // ✅ (même si invalide, on garde le champ)
 
         mvc.perform(post("/api/activities")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -149,7 +162,6 @@ class ActivityControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-
     @Test
     void testUpdateActivity_Success() throws Exception {
         ActivityDTO updateDTO = new ActivityDTO();
@@ -157,7 +169,7 @@ class ActivityControllerTest {
         updateDTO.setNature(ActivityNature.PROJET);
         updateDTO.setTitle("Spring Boot Advanced");
         updateDTO.setDescription("API + Tests avancés");
-        updateDTO.setPersonId(person.getId());
+        updateDTO.setResumeId(resume.getId()); // ✅
 
         mvc.perform(put("/api/activities/" + activity1.getId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -168,14 +180,13 @@ class ActivityControllerTest {
                 .andExpect(jsonPath("$.description").value("API + Tests avancés"));
     }
 
-
     @Test
     void testUpdateActivity_NotFound() throws Exception {
         ActivityDTO dto = new ActivityDTO();
         dto.setYear(2025);
         dto.setNature(ActivityNature.EXPERIENCE);
         dto.setTitle("Nonexistent Update");
-        dto.setPersonId(person.getId());
+        dto.setResumeId(resume.getId()); // ✅
 
         mvc.perform(put("/api/activities/9999")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -190,7 +201,7 @@ class ActivityControllerTest {
         invalid.setYear(null);
         invalid.setNature(null);
         invalid.setTitle("");
-        invalid.setPersonId(person.getId());
+        invalid.setResumeId(resume.getId()); // ✅
 
         mvc.perform(put("/api/activities/" + activity1.getId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -198,6 +209,7 @@ class ActivityControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
+
     @Test
     void testDeleteActivity_Success() throws Exception {
         mvc.perform(delete("/api/activities/" + activity1.getId()))
@@ -213,6 +225,4 @@ class ActivityControllerTest {
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
-
-
 }

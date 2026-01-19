@@ -29,6 +29,8 @@ public class ActivityDTO {
     private String description;
     private String webAddress;
 
-    @NotNull
+    @NotNull(message = "resumeId must not be null")
+    private Long resumeId;
+
     private Long personId;
 }

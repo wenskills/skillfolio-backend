@@ -2,6 +2,7 @@ package app.service;
 
 import app.dao.ActivityRepository;
 import app.dao.PersonRepository;
+import app.dao.ResumeRepository;
 import app.dto.ActivityDTO;
 import app.model.Activity;
 import app.model.Person;
@@ -20,13 +21,13 @@ import java.util.Optional;
 public class ActivityService {
 
     private final ActivityRepository activityRepository;
-    private final PersonRepository personRepository;
+    private final ResumeRepository resumeRepository;
     private final ModelMapper mapper;
 
-    public ActivityService(ActivityRepository activityRepository,ModelMapper mapper, PersonRepository personRepository) {
+    public ActivityService(ActivityRepository activityRepository, ModelMapper mapper, ResumeRepository resumeRepository) {
         this.activityRepository = activityRepository;
         this.mapper = mapper;
-        this.personRepository=personRepository ;
+        this.resumeRepository = resumeRepository;
     }
 
     @Transactional(readOnly = true)
@@ -44,34 +45,37 @@ public class ActivityService {
     }
 
     public ActivityDTO create(ActivityDTO dto) {
-        Person person = personRepository.findById(dto.getPersonId())
-                .orElseThrow(() -> new EntityNotFoundException("Person not found with id: " + dto.getPersonId()));
+        var resume = resumeRepository.findById(dto.getResumeId())
+                .orElseThrow(() -> new EntityNotFoundException("Resume not found with id: " + dto.getResumeId()));
 
         Activity entity = mapper.map(dto, Activity.class);
-
-        entity.setPerson(person);
+        entity.setResume(resume);
         entity.setId(null);
 
         Activity saved = activityRepository.save(entity);
-        return mapper.map(saved, ActivityDTO.class);
-    }
 
+        ActivityDTO out = mapper.map(saved, ActivityDTO.class);
+        out.setResumeId(resume.getId());
+        return out;
+    }
     public ActivityDTO update(Long id, ActivityDTO dto) {
-        Activity existingActivity = activityRepository.findById(id)
+        Activity existing = activityRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Activity not found with id: " + id));
 
-        if (dto.getPersonId() != null && !dto.getPersonId().equals(existingActivity.getPerson().getId())) {
-            Person newPerson = personRepository.findById(dto.getPersonId())
-                    .orElseThrow(() -> new EntityNotFoundException("Person not found with id: " + dto.getPersonId()));
-            existingActivity.setPerson(newPerson);
+        if (dto.getResumeId() != null && !dto.getResumeId().equals(existing.getResume().getId())) {
+            var newResume = resumeRepository.findById(dto.getResumeId())
+                    .orElseThrow(() -> new EntityNotFoundException("Resume not found with id: " + dto.getResumeId()));
+            existing.setResume(newResume);
         }
 
-        mapper.map(dto, existingActivity);
+        mapper.map(dto, existing);
+        existing.setId(id);
 
-        existingActivity.setId(id);
+        Activity saved = activityRepository.save(existing);
 
-        Activity saved = activityRepository.save(existingActivity);
-        return mapper.map(saved, ActivityDTO.class);
+        ActivityDTO out = mapper.map(saved, ActivityDTO.class);
+        out.setResumeId(saved.getResume().getId());
+        return out;
     }
 
     public void delete(Long id) {

@@ -1,11 +1,13 @@
 package app.service;
 
 import app.dao.PersonRepository;
+import app.dao.ResumeRepository;
 import app.dto.ActivityDTO;
 import app.dto.PersonDTO;
 import app.dto.PersonFormDTO;
 import app.model.Activity;
 import app.model.Person;
+import app.model.Resume;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,7 @@ import static org.mockito.Mockito.*;
 class PersonServiceTest {
 
     private PersonRepository personRepository;
+    private ResumeRepository resumeRepository;
     private PasswordEncoder encoder;
     private ModelMapper mapper;
     private PersonService service;
@@ -28,9 +31,10 @@ class PersonServiceTest {
     @BeforeEach
     void setup() {
         personRepository = mock(PersonRepository.class);
+        resumeRepository = mock(ResumeRepository.class);
         encoder = mock(PasswordEncoder.class);
         mapper = new ModelMapper();
-        service = new PersonService(personRepository, encoder, mapper);
+        service = new PersonService(personRepository, resumeRepository, encoder, mapper);
     }
 
     @Test
@@ -159,19 +163,23 @@ class PersonServiceTest {
         Activity a2 = new Activity();
         a2.setId(200L);
 
-        p.setCv(List.of(a1, a2));
+        Resume resume = new Resume();
+        resume.setId(10L);
+        resume.setOwner(p);
+        resume.setActivities(List.of(a1, a2));
 
-        when(personRepository.findById(1L)).thenReturn(Optional.of(p));
+        // ✅ Maintenant on récupère via le resume "default"
+        when(resumeRepository.findFirstByOwnerIdOrderByIdAsc(1L)).thenReturn(Optional.of(resume));
 
         List<ActivityDTO> result = service.getActivitiesByPersonId(1L);
 
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getPersonId()).isEqualTo(1L);
+        assertThat(result.get(0).getResumeId()).isEqualTo(10L);
     }
 
     @Test
     void testGetActivitiesByPersonId_ThrowsWhenNotFound() {
-        when(personRepository.findById(1L)).thenReturn(Optional.empty());
+        when(resumeRepository.findFirstByOwnerIdOrderByIdAsc(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.getActivitiesByPersonId(1L))
                 .isInstanceOf(EntityNotFoundException.class);

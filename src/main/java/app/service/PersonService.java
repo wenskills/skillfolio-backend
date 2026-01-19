@@ -1,9 +1,10 @@
 package app.service;
 
 import app.dao.PersonRepository;
+import app.dao.ResumeRepository;
 import app.dto.*;
-import app.model.Activity;
 import app.model.Person;
+import app.model.Resume;
 import jakarta.persistence.EntityNotFoundException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.modelmapper.ModelMapper;
@@ -13,17 +14,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Stream;
 
 /**************
  *  GESTION METIER DES PERSONNES
@@ -33,6 +29,7 @@ import java.util.stream.Stream;
 public class PersonService {
 
     private final PersonRepository personRepository;
+    private ResumeRepository resumeRepository;
     private final PasswordEncoder encoder;
 
     @Autowired
@@ -41,10 +38,15 @@ public class PersonService {
 
     private final ModelMapper mapper;
 
-    public PersonService(PersonRepository personRepository,
-                         PasswordEncoder encoder,
-                         ModelMapper mapper) {
+    public PersonService(
+            PersonRepository personRepository,
+            ResumeRepository resumeRepository,
+            PasswordEncoder encoder,
+            ModelMapper mapper
+
+    ) {
         this.personRepository = personRepository;
+        this.resumeRepository = resumeRepository;
         this.encoder = encoder;
         this.mapper = mapper;
     }
@@ -125,17 +127,27 @@ public class PersonService {
 
     @Transactional(readOnly = true)
     public List<ActivityDTO> getActivitiesByPersonId(Long personId) {
-        Person person = personRepository.findById(personId)
-                .orElseThrow(() -> new EntityNotFoundException("Personne introuvable avec l'id " + personId));
+        Resume resume = resumeRepository.findFirstByOwnerIdOrderByIdAsc(personId)
+                .orElseThrow(() -> new EntityNotFoundException("Aucun CV pour la personne " + personId));
 
-        return person.getCv().stream()
-                .map(activity -> {
-                    ActivityDTO dto = mapper.map(activity, ActivityDTO.class);
-                    dto.setPersonId(person.getId());
+        return resume.getActivities().stream()
+                .sorted((a, b) -> {
+                    Integer ya = a.getYear();
+                    Integer yb = b.getYear();
+                    if (ya == null && yb == null) return 0;
+                    if (ya == null) return 1;     // nulls last
+                    if (yb == null) return -1;
+                    return Integer.compare(yb, ya); // desc
+                })
+
+                .map(a -> {
+                    ActivityDTO dto = mapper.map(a, ActivityDTO.class);
+                    dto.setResumeId(resume.getId());
                     return dto;
                 })
                 .toList();
     }
+
 
     public PersonDTO createViaCooptation(PersonCreateDTO dto) {
 

@@ -57,9 +57,9 @@ public class Person {
     @Size(min = 8, message = "Le mot de passe doit faire au moins 8 caractères")
     private String password;
 
-    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonManagedReference
-    private List<Activity> cv = new ArrayList<>();
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "person-resumes")
+    private List<Resume> resumes = new ArrayList<>();
 
     private String resetToken;
     private LocalDateTime resetTokenExpiration;
