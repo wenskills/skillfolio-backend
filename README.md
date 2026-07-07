@@ -80,55 +80,6 @@ erDiagram
         String webAddress
     }
 ```
-
-### `Person`
-
-L'entité `Person` représente le profil principal du portfolio.
-
-Champs principaux :
-
-- `firstName` : prénom obligatoire.
-- `lastName` : nom obligatoire.
-- `email` : email obligatoire, unique et validé.
-- `website` : site personnel ou portfolio.
-- `birthDate` : date de naissance.
-- `password` : mot de passe avec une taille minimale de 8 caractères.
-- `cv` : liste des activités associées au profil.
-
-La relation avec les activités est configurée en `OneToMany` avec :
-
-- `cascade = CascadeType.ALL` pour propager les opérations sur les activités liées ;
-- `orphanRemoval = true` pour supprimer une activité retirée du CV ;
-- `mappedBy = "person"` pour indiquer que l'entité `Activity` porte la clé étrangère.
-
-### `Activity`
-
-L'entité `Activity` représente une ligne de parcours.
-
-Champs principaux :
-
-- `year` : année de l'activité.
-- `nature` : type d'activité via l'énumération `ActivityNature`.
-- `title` : titre obligatoire.
-- `description` : description longue, limitée à 2000 caractères en base.
-- `webAddress` : lien associé à l'activité.
-- `person` : profil auquel l'activité appartient.
-
-La relation avec `Person` est configurée en `ManyToOne(fetch = FetchType.LAZY)` afin d'éviter de charger le profil complet inutilement à chaque lecture d'activité.
-
-### `ActivityNature`
-
-```java
-public enum ActivityNature {
-    EXPERIENCE,
-    FORMATION,
-    PROJET,
-    AUTRE
-}
-```
-
-Cette énumération permet de catégoriser proprement les éléments du CV sans stocker de texte libre fragile en base.
-
 ---
 
 ## Architecture du projet
