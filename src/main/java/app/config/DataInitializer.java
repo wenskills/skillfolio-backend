@@ -81,10 +81,8 @@ public class DataInitializer {
 
             if (personsBatch.size() == BATCH_SIZE) {
 
-                // 1) Save persons
                 List<Person> savedPersons = personRepository.saveAll(personsBatch);
 
-                // 2) Create + save resumes (CV principal)
                 resumesBatch.clear();
                 for (Person saved : savedPersons) {
                     Resume r = new Resume();
@@ -94,8 +92,7 @@ public class DataInitializer {
                     resumesBatch.add(r);
                 }
                 List<Resume> savedResumes = resumeRepository.saveAll(resumesBatch);
-
-                // 3) Create activities and attach to the corresponding resume
+                
                 actsBatch.clear();
                 for (int idx = 0; idx < savedPersons.size(); idx++) {
                     Resume resume = savedResumes.get(idx);
@@ -103,7 +100,7 @@ public class DataInitializer {
                     int nActs = 2 + random.nextInt(4);
                     for (int j = 0; j < nActs; j++) {
                         Activity a = new Activity();
-                        a.setResume(resume); // ✅ au lieu de setPerson(saved)
+                        a.setResume(resume);
                         a.setYear(2000 + random.nextInt(25));
                         a.setNature(randomNature());
                         a.setTitle(faker.job().title());
@@ -121,7 +118,6 @@ public class DataInitializer {
             }
         }
 
-        // Si TOTAL n'est pas multiple de BATCH_SIZE, gérer le reste
         if (!personsBatch.isEmpty()) {
             List<Person> savedPersons = personRepository.saveAll(personsBatch);
 
