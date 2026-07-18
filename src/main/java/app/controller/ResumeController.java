@@ -48,7 +48,6 @@ public class ResumeController {
         return ResponseEntity.ok(toDetailsDto(resume));
     }
 
-    // ✅ Pour la page publique: #cv?personId=6
     @GetMapping("/by-person/{personId}/default")
     public ResponseEntity<ResumeDetailsDTO> getDefaultByPerson(@PathVariable Long personId) {
         Resume resume = resumeRepository.findFirstByOwnerIdOrderByIdAsc(personId)
