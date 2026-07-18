@@ -4,6 +4,7 @@ import app.model.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -13,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
+@ActiveProfiles("open")
 class ActivityRepositoryTest {
 
     @Autowired
@@ -20,6 +22,9 @@ class ActivityRepositoryTest {
 
     @Autowired
     private PersonRepository personRepository;
+
+    @Autowired
+    private ResumeRepository resumeRepository;
 
     @Test
     void testCreateAndReadActivity() {
@@ -31,19 +36,24 @@ class ActivityRepositoryTest {
         person.setBirthDate(LocalDate.of(1992, 1, 10));
         personRepository.save(person);
 
+        Resume resume = new Resume();
+        resume.setOwner(person);
+        resume.setTitle("CV principal");
+        resumeRepository.save(resume);
+
         Activity activity = new Activity();
         activity.setYear(2024);
         activity.setNature(ActivityNature.PROJET);
         activity.setTitle("Développement Application JEE");
         activity.setDescription("Mini projet Spring Boot - Gestion de CVs");
         activity.setWebAddress("https://github.com/janejee");
-        activity.setPerson(person);
+        activity.setResume(resume);
         activityRepository.save(activity);
 
         Optional<Activity> found = activityRepository.findById(activity.getId());
         assertThat(found).isPresent();
         assertThat(found.get().getTitle()).isEqualTo("Développement Application JEE");
-        assertThat(found.get().getPerson().getEmail()).isEqualTo("jane@doe.com");
+        assertThat(found.get().getResume().getOwner().getEmail()).isEqualTo("jane@doe.com");
     }
 
     @Test
@@ -55,12 +65,17 @@ class ActivityRepositoryTest {
         p.setPassword("password123");
         personRepository.save(p);
 
+        Resume resume = new Resume();
+        resume.setOwner(p);
+        resume.setTitle("CV principal");
+        resumeRepository.save(resume);
+
         Activity a = new Activity();
         a.setYear(2023);
         a.setNature(ActivityNature.EXPERIENCE);
         a.setTitle("Stage Java");
         a.setDescription("Développement backend Spring");
-        a.setPerson(p);
+        a.setResume(resume);
         activityRepository.save(a);
 
         a.setTitle("Stage Spring Boot");
@@ -79,12 +94,17 @@ class ActivityRepositoryTest {
         p.setPassword("password123");
         personRepository.save(p);
 
+        Resume resume = new Resume();
+        resume.setOwner(p);
+        resume.setTitle("CV principal");
+        resumeRepository.save(resume);
+
         Activity a = new Activity();
         a.setYear(2022);
         a.setNature(ActivityNature.FORMATION);
         a.setTitle("Master Informatique");
         a.setDescription("Université de Paris");
-        a.setPerson(p);
+        a.setResume(resume);
         activityRepository.save(a);
 
         activityRepository.delete(a);
